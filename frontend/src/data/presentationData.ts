@@ -166,7 +166,7 @@ export const SLIDES: Slide[] = [
     subtitle: '¡Es hora de poner a prueba lo aprendido!',
     bullets: [
       '¿Tienes alguna duda o pregunta sobre la presentación?',
-      'A continuación iniciaremos la dinámica interactiva de 10 preguntas.',
+      'A continuación iniciaremos la dinámica interactiva de preguntas.',
       '¡Ingresa tu nombre para unirte al tablero y competir por el 1.er lugar en el podio!'
     ]
   }
@@ -175,132 +175,106 @@ export const SLIDES: Slide[] = [
 export const QUIZ_QUESTIONS: Question[] = [
   {
     id: 1,
-    question: '¿Qué es la gestión del conocimiento dentro de una organización?',
+    question: '1. ¿Qué es la gestión del conocimiento?',
     options: [
-      'Un software para enviar correos masivos a clientes',
-      'Un proceso estratégico de capturar, desarrollar, compartir y utilizar eficazmente el conocimiento',
-      'Una técnica contable para reducir los impuestos anuales',
-      'Un manual impreso que se entrega únicamente a la alta gerencia'
+      'Es un software contable para calcular los impuestos anuales de la empresa',
+      'Es el proceso de capturar, desarrollar, compartir y utilizar eficazmente el conocimiento dentro de una organización',
+      'Es una estrategia para archivar únicamente documentos físicos antiguos',
+      'Es un programa de publicidad para aumentar seguidores en redes sociales'
     ],
     correctIndex: 1,
-    explanation: 'La Gestión del Conocimiento es el proceso estratégico para capturar, desarrollar, compartir y utilizar eficazmente el saber corporativo para mejorar productividad y decisiones.',
-    timeLimit: 20
+    explanation: 'Respuesta exacta: Es el proceso de capturar, desarrollar, compartir y utilizar eficazmente el conocimiento dentro de una organización.',
+    timeLimit: 30
   },
   {
     id: 2,
-    question: 'En la Pirámide del Valor, ¿cuál es el orden correcto de menor a mayor nivel de madurez?',
+    question: '2. ¿Cuál es la diferencia entre datos, información y conocimiento?',
     options: [
-      'Información ➔ Datos ➔ Sabiduría ➔ Conocimiento',
-      'Datos ➔ Información ➔ Conocimiento ➔ Inteligencia / Sabiduría',
-      'Conocimiento ➔ Datos ➔ Información ➔ Sabiduría',
-      'Sabiduría ➔ Conocimiento ➔ Información ➔ Datos'
+      'Los datos son decisiones tomadas; la información es suposiciones; y el conocimiento son números crudos',
+      'No existe ninguna diferencia, los tres conceptos son exactamente iguales en una organización',
+      'Los datos son números o hechos sueltos; la información organiza esos datos; y el conocimiento permite saber qué hacer con esa información para tomar decisiones',
+      'Los datos se guardan en papel; la información son correos; y el conocimiento es una reunión informal'
     ],
-    correctIndex: 1,
-    explanation: 'La Pirámide del Valor inicia en la base con Datos, luego Información, sube a Conocimiento y culmina en la cima con Inteligencia / Sabiduría.',
-    timeLimit: 20
+    correctIndex: 2,
+    explanation: 'Respuesta exacta: Los datos son números o hechos sueltos; la información organiza esos datos; y el conocimiento permite saber qué hacer con esa información para tomar decisiones.',
+    timeLimit: 30
   },
   {
     id: 3,
-    question: '¿Cuál de las siguientes características corresponde al Conocimiento Explícito?',
+    question: '3. ¿Qué es el conocimiento tácito?',
     options: [
-      'Es difícil de transmitir y sólo está en la mente del trabajador',
-      'Es fruto de la intuición no documentada',
-      'Está escrito, estructurado y es fácil de transmitir (manuales, normas, tutoriales)',
-      'Cambia todos los días sin dejar registro'
+      'Es el conocimiento que está en la mente de las personas, basado en su experiencia e intuición, y es difícil de escribir o transmitir',
+      'Es todo documento oficial registrado en PDF dentro de la intranet de la empresa',
+      'Es la lista pública de precios y productos ofertados en el mercado',
+      'Es el manual de usuario que viene impreso con un equipo de computación'
     ],
-    correctIndex: 2,
-    explanation: 'El conocimiento explícito está formalizado, escrito y estructurado en documentos, manuales, bases de datos o normas.',
-    timeLimit: 20
+    correctIndex: 0,
+    explanation: 'Respuesta exacta: Es el conocimiento que está en la mente de las personas, basado en su experiencia e intuición, y es difícil de escribir o transmitir.',
+    timeLimit: 30
   },
   {
     id: 4,
-    question: '¿De dónde proviene el Conocimiento Tácito?',
+    question: '4. ¿Qué es el conocimiento explícito?',
     options: [
-      'De la experiencia, intuición y los "trucos" del día a día del trabajador',
-      'De manuales impresos comprados en una librería',
-      'De un contrato formal de trabajo',
-      'De las especificaciones técnicas de un servidor'
+      'Es la intuición personal de cada empleado que nunca queda documentada',
+      'Es el conocimiento que ya está registrado, por ejemplo, en manuales, libros o bases de datos',
+      'Son las corazonadas o trucos no escritos del día a día de un trabajador',
+      'Es la opinión informal que se comparte durante el almuerzo'
     ],
-    correctIndex: 0,
-    explanation: 'El conocimiento tácito reside en las personas; surge de su experiencia práctica, intuición y hábitos acumulados.',
-    timeLimit: 20
+    correctIndex: 1,
+    explanation: 'Respuesta exacta: Es el conocimiento que ya está registrado, por ejemplo, en manuales, libros o bases de datos.',
+    timeLimit: 30
   },
   {
     id: 5,
-    question: '¿Cuál es la secuencia completa del Ciclo de la Gestión del Conocimiento?',
+    question: '5. ¿Cuáles son las etapas del ciclo de la gestión del conocimiento?',
     options: [
-      'Comprar ➔ Vender ➔ Guardar ➔ Borrar ➔ Repetir',
-      'Crear ➔ Capturar ➔ Organizar ➔ Almacenar ➔ Compartir ➔ Aplicar',
-      'Planear ➔ Ejecutar ➔ Evaluar ➔ Corregir',
-      'Analizar ➔ Copiar ➔ Pegar ➔ Enviar'
+      'Comprar, vender, publicitar, facturar, enviar y cobrar',
+      'Planear, imprimir, archivar, formatear y reiniciar el sistema',
+      'Crear, capturar, organizar, almacenar, compartir y aplicar el conocimiento',
+      'Memorizar, guardar en secreto, no compartir y borrar al finalizar'
     ],
-    correctIndex: 1,
-    explanation: 'El ciclo comprende 6 etapas: Crear, Capturar, Organizar, Almacenar, Compartir y Aplicar el conocimiento.',
-    timeLimit: 20
+    correctIndex: 2,
+    explanation: 'Respuesta exacta: Las 6 etapas son Crear, capturar, organizar, almacenar, compartir y aplicar el conocimiento.',
+    timeLimit: 30
   },
   {
     id: 6,
-    question: '¿Cuál de las siguientes opciones es un BENEFICIO clave de la gestión del conocimiento?',
+    question: '6. ¿Qué pasa si un empleado importante renuncia?',
     options: [
-      'Obliga a los empleados a memorizar datos sin entenderlos',
-      'Evita que el conocimiento se pierda cuando alguien se retira y acelera el aprendizaje',
-      'Remplaza completamente a los trabajadores por robots',
-      'Aumenta los costos operativos duplicando tareas'
+      'Una buena gestión del conocimiento ayuda a evitar que la organización pierda el conocimiento que tenía ese empleado',
+      'La empresa se ve obligada a cerrar permanentemente todas sus actividades',
+      'El conocimiento del empleado se elimina automáticamente de los servidores',
+      'Se prohíbe que cualquier otro trabajador asuma las funciones vacantes'
     ],
-    correctIndex: 1,
-    explanation: 'Permite retener la memoria corporativa, acelerar la inducción de nuevos colaboradores e impulsar la innovación.',
-    timeLimit: 20
+    correctIndex: 0,
+    explanation: 'Respuesta exacta: Una buena gestión del conocimiento ayuda a evitar que la organización pierda el conocimiento que tenía ese empleado.',
+    timeLimit: 30
   },
   {
     id: 7,
-    question: '¿En qué se centra la Planeación de Producto?',
+    question: '7. ¿Qué herramientas tecnológicas pueden utilizar las empresas para gestionar el conocimiento?',
     options: [
-      'Fijar únicamente ofertas y descuentos de temporada',
-      'Desarrollar nuevos productos, innovar o retirar productos obsoletos del mercado',
-      'Contratar personal para el departamento de envíos',
-      'Calcular los impuestos de importación'
+      'Consolas de videojuegos y aplicaciones de mensajería informal personal',
+      'Intranets, bases de datos compartidas, SharePoint, Notion, Confluence y wikis internas',
+      'Memorias USB personales no respaldadas y blocs de notas en papel',
+      'Redes sociales públicas sin control ni almacenamiento institucional'
     ],
     correctIndex: 1,
-    explanation: 'La planeación de producto se encarga del ciclo de vida del producto: innovar, crear nuevos modelos o descontinuar los obsoletos.',
-    timeLimit: 20
+    explanation: 'Respuesta exacta: Intranets, bases de datos compartidas, SharePoint, Notion, Confluence y wikis internas.',
+    timeLimit: 30
   },
   {
     id: 8,
-    question: '¿Cuál es la diferencia principal de la Planeación de Precios frente a la de Producto?',
+    question: '8. ¿Qué estrategias humanas ayudan a compartir conocimiento?',
     options: [
-      'La de precios investiga precios competidores, descuentos y balance costo-precio',
-      'La de precios se dedica a diseñar el empaque físico',
-      'La de precios solo aplica para servicios digitales',
-      'No existe ninguna diferencia entre ambas'
-    ],
-    correctIndex: 0,
-    explanation: 'La planeación de precios analiza las tarifas de mercado, margen costo-beneficio, descuentos y políticas de ventas.',
-    timeLimit: 20
-  },
-  {
-    id: 9,
-    question: 'SharePoint, Notion y Confluence corresponden a la categoría de:',
-    options: [
-      'Estrategias humanas de mentoría',
-      'Sistemas de almacenamiento y bases de datos compartidas',
-      'Redes sociales para videojuegos',
-      'Herramientas exclusivas de diseño 3D'
+      'Prohibir que los empleados conversen entre sí durante la jornada de trabajo',
+      'Las mentorías, las comunidades de práctica y las capacitaciones constantes',
+      'Entregar un libro sin ofrecer explicaciones, guías ni tutorías',
+      'Aislar a los trabajadores antiguos para evitar distracciones en la oficina'
     ],
     correctIndex: 1,
-    explanation: 'Son plataformas de almacenamiento, documentación y bases de conocimiento estructuradas en la nube.',
-    timeLimit: 20
-  },
-  {
-    id: 10,
-    question: '¿Cuál de los siguientes es un ejemplo de Estrategia Humana de gestión del conocimiento?',
-    options: [
-      'Mentorías, Comunidades de práctica y Capacitaciones',
-      'Instalar una red de fibra óptica en la oficina',
-      'Formatear una computadora antigua',
-      'Crear una hoja de cálculo en Excel sin compartir'
-    ],
-    correctIndex: 0,
-    explanation: 'Las estrategias humanas conectan personas directamente para transferir saberes mediante mentorías, comunidades de práctica y programas de capacitación.',
-    timeLimit: 20
+    explanation: 'Respuesta exacta: Las mentorías, las comunidades de práctica y las capacitaciones constantes.',
+    timeLimit: 30
   }
 ];

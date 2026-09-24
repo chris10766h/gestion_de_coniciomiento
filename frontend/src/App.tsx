@@ -6,7 +6,7 @@ import { quizEngine } from './services/quizEngine';
 import { Crown, Gamepad2, Trophy, Lock, Key, HelpCircle, LogOut } from 'lucide-react';
 import './App.css';
 
-const PRESENTER_PIN = '1234'; // Clave por defecto para los expositores
+const PRESENTER_PIN = '31415Akos'; // Clave secreta para expositores
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'player' | 'host' | 'podium'>('player');
@@ -38,7 +38,7 @@ export default function App() {
 
   const handleVerifyPin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (enteredPin.trim() === PRESENTER_PIN) {
+    if (enteredPin === PRESENTER_PIN) {
       setIsHostAuthenticated(true);
       setShowPinModal(false);
       setActiveTab('host');
@@ -118,7 +118,7 @@ export default function App() {
                 <input 
                   type="password"
                   className={`join-input ${pinError ? 'input-error' : ''}`}
-                  placeholder="Clave (por defecto: 1234)"
+                  placeholder="Ingresa la clave de expositor"
                   value={enteredPin}
                   onChange={(e) => {
                     setEnteredPin(e.target.value);
@@ -130,7 +130,7 @@ export default function App() {
 
               {pinError && (
                 <div className="pin-error-text">
-                  ⚠️ Clave incorrecta. Intenta de nuevo (Clave: <strong>1234</strong>).
+                  ⚠️ Clave incorrecta. Por favor intenta nuevamente.
                 </div>
               )}
 
@@ -156,10 +156,10 @@ export default function App() {
           </div>
           <div className="guide-body">
             <div className="guide-step">
-              <strong>1. Para Estudiantes / Participantes:</strong> Ingresan a <em>"Modo Jugador"</em>, escriben únicamente su <strong>Nombre</strong> y esperan el inicio del juego.
+              <strong>1. Para Estudiantes / Participantes:</strong> Ingresan a <em>"Modo Jugador"</em>, escriben únicamente su <strong>Nombre</strong> y responden las preguntas.
             </div>
             <div className="guide-step">
-              <strong>2. Para los Expositores:</strong> Hacen clic en <em>"Panel Presentador"</em> e ingresan la clave secreta (<strong>1234</strong>) para controlar las preguntas, ver respuestas y lanzar el podio.
+              <strong>2. Para los Expositores:</strong> Hacen clic en <em>"Panel Presentador"</em> e ingresan la clave secreta reservada para controlar las preguntas, el ritmo del juego, ver respuestas y lanzar el podio.
             </div>
           </div>
         </div>
