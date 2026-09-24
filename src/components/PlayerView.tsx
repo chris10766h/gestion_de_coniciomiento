@@ -16,6 +16,7 @@ export const PlayerView: React.FC<PlayerViewProps> = ({ onGoToPodium }) => {
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [lastFeedback, setLastFeedback] = useState<{ isCorrect: boolean; points: number } | null>(null);
+  const [isJoining, setIsJoining] = useState(false);
 
   // Restore saved player session if available
   useEffect(() => {
@@ -54,21 +55,31 @@ export const PlayerView: React.FC<PlayerViewProps> = ({ onGoToPodium }) => {
     }
   }, [gameState.currentQuestionIndex, gameState.status]);
 
-  const handleJoin = (e: React.FormEvent) => {
+  const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!playerName.trim()) return;
-
-    const player = quizEngine.joinGame(playerName.trim());
-    setCurrentPlayer(player);
-    sessionStorage.setItem('gc_quiz_player_id', player.id);
+    if (!playerName.trim() || isJoining) return;
+    setIsJoining(true);
+    try {
+      const player = await quizEngine.joinGame(playerName.trim());
+      setCurrentPlayer(player);
+      sessionStorage.setItem('gc_quiz_player_id', player.id);
+    } catch (err) {
+      console.error('Error al unirse:', err);
+    } finally {
+      setIsJoining(false);
+    }
   };
 
-  const handleAnswer = (optionIdx: number) => {
+  const handleAnswer = async (optionIdx: number) => {
     if (!currentPlayer || selectedOption !== null || gameState.status !== 'QUESTION') return;
 
     setSelectedOption(optionIdx);
-    const result = quizEngine.submitAnswer(currentPlayer.id, optionIdx);
-    setLastFeedback({ isCorrect: result.isCorrect, points: result.pointsEarned });
+    try {
+      const result = await quizEngine.submitAnswer(currentPlayer.id, optionIdx);
+      setLastFeedback({ isCorrect: result.isCorrect, points: result.pointsEarned });
+    } catch (err) {
+      console.error('Error al enviar respuesta:', err);
+    }
   };
 
   // 1. JOIN SCREEN (Sin contraseña, solo nombre)
@@ -98,8 +109,8 @@ export const PlayerView: React.FC<PlayerViewProps> = ({ onGoToPodium }) => {
             />
           </div>
 
-          <button type="submit" className="btn-join-submit">
-            ¡Entrar a la Sala!
+          <button type="submit" className="btn-join-submit" disabled={isJoining}>
+            {isJoining ? 'Entrando...' : '¡Entrar a la Sala!'}
           </button>
         </form>
       </div>

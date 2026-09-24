@@ -1,4 +1,6 @@
 import { QUIZ_QUESTIONS, type Question } from '../data/presentationData';
+import { db } from './firebase';
+import { ref, onValue, set, get } from 'firebase/database';
 
 export type GameStatus = 'LOBBY' | 'QUESTION' | 'REVEAL' | 'PODIUM';
 
@@ -23,8 +25,7 @@ export interface GameState {
   lastUpdate: number;
 }
 
-const STORAGE_KEY = 'gc_quiz_state_v1';
-const CHANNEL_NAME = 'gc_quiz_broadcast_channel';
+const GAME_REF = 'quiz_game';
 
 // Default initial game state
 const initialGameState: GameState = {
@@ -38,46 +39,40 @@ const initialGameState: GameState = {
 
 class QuizEngine {
   private state: GameState = initialGameState;
-  private channel: BroadcastChannel | null = null;
   private listeners: ((state: GameState) => void)[] = [];
   private botTimers: number[] = [];
 
   constructor() {
-    // Initialize BroadcastChannel if supported
-    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
-      this.channel = new BroadcastChannel(CHANNEL_NAME);
-      this.channel.onmessage = (event) => {
-        if (event.data && event.data.type === 'STATE_UPDATE') {
-          this.state = event.data.state;
-          this.notifyListeners();
-        }
-      };
-    }
+    this.initFirebaseListener();
+  }
 
-    // Fallback or secondary sync via localStorage
-    if (typeof window !== 'undefined') {
-      window.addEventListener('storage', (e) => {
-        if (e.key === STORAGE_KEY && e.newValue) {
-          try {
-            const parsed = JSON.parse(e.newValue);
-            this.state = parsed;
-            this.notifyListeners();
-          } catch (err) {
-            console.error('Error parsing stored state:', err);
-          }
-        }
-      });
+  private initFirebaseListener() {
+    const gameRef = ref(db, GAME_REF);
 
-      // Load initial stored state if available
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try {
-          this.state = JSON.parse(saved);
-        } catch (e) {
-          this.state = initialGameState;
-        }
+    // Cargar estado inicial y suscribirse a cambios en tiempo real
+    onValue(gameRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        // Convertir objeto de players de Firebase (objeto) a array
+        const rawPlayers = data.players;
+        const playersArray: Player[] = rawPlayers
+          ? (Array.isArray(rawPlayers)
+              ? rawPlayers.filter(Boolean)
+              : Object.values(rawPlayers))
+          : [];
+
+        this.state = {
+          ...data,
+          players: playersArray
+        };
+      } else {
+        // Primera vez: inicializar en Firebase
+        set(gameRef, initialGameState);
+        this.state = initialGameState;
       }
-    }
+      this.notifyListeners();
+    });
+
   }
 
   public getState(): GameState {
@@ -96,15 +91,13 @@ class QuizEngine {
     this.listeners.forEach(l => l(this.state));
   }
 
-  private saveAndBroadcast(newState: GameState) {
+  private async saveToFirebase(newState: GameState) {
     this.state = { ...newState, lastUpdate: Date.now() };
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+    try {
+      await set(ref(db, GAME_REF), this.state);
+    } catch (err) {
+      console.error('Error guardando en Firebase:', err);
     }
-    if (this.channel) {
-      this.channel.postMessage({ type: 'STATE_UPDATE', state: this.state });
-    }
-    this.notifyListeners();
   }
 
   // --- HOST ACTIONS ---
@@ -114,9 +107,10 @@ class QuizEngine {
     const newState: GameState = {
       ...initialGameState,
       pin: Math.floor(100000 + Math.random() * 900000).toString(),
-      players: []
+      players: [],
+      lastUpdate: Date.now()
     };
-    this.saveAndBroadcast(newState);
+    this.saveToFirebase(newState);
   }
 
   public startQuiz() {
@@ -133,8 +127,8 @@ class QuizEngine {
         isCorrect: null
       }))
     };
-    this.saveAndBroadcast(newState);
-    this.scheduleBotsAnswer();
+    this.saveToFirebase(newState);
+    setTimeout(() => this.scheduleBotsAnswer(), 200);
   }
 
   public nextQuestion() {
@@ -157,8 +151,8 @@ class QuizEngine {
         isCorrect: null
       }))
     };
-    this.saveAndBroadcast(newState);
-    this.scheduleBotsAnswer();
+    this.saveToFirebase(newState);
+    setTimeout(() => this.scheduleBotsAnswer(), 200);
   }
 
   public revealAnswers() {
@@ -167,7 +161,7 @@ class QuizEngine {
       ...this.state,
       status: 'REVEAL'
     };
-    this.saveAndBroadcast(newState);
+    this.saveToFirebase(newState);
   }
 
   public showPodium() {
@@ -176,7 +170,7 @@ class QuizEngine {
       ...this.state,
       status: 'PODIUM'
     };
-    this.saveAndBroadcast(newState);
+    this.saveToFirebase(newState);
   }
 
   public addBotPlayers(count = 5) {
@@ -208,11 +202,8 @@ class QuizEngine {
       });
     }
 
-    const newState = {
-      ...this.state,
-      players: newPlayers
-    };
-    this.saveAndBroadcast(newState);
+    const newState = { ...this.state, players: newPlayers };
+    this.saveToFirebase(newState);
   }
 
   public removePlayer(id: string) {
@@ -220,17 +211,28 @@ class QuizEngine {
       ...this.state,
       players: this.state.players.filter(p => p.id !== id)
     };
-    this.saveAndBroadcast(newState);
+    this.saveToFirebase(newState);
   }
 
   // --- PLAYER ACTIONS ---
 
-  public joinGame(name: string): Player {
+  public async joinGame(name: string): Promise<Player> {
     const cleanName = name.trim();
-    const existing = this.state.players.find(p => p.name.toLowerCase() === cleanName.toLowerCase());
-    if (existing) {
-      return existing;
-    }
+
+    // Leer estado fresco de Firebase antes de unirse
+    const snapshot = await get(ref(db, GAME_REF));
+    const freshData = snapshot.val();
+    const rawPlayers = freshData?.players;
+    const freshPlayers: Player[] = rawPlayers
+      ? (Array.isArray(rawPlayers)
+          ? rawPlayers.filter(Boolean)
+          : Object.values(rawPlayers))
+      : [];
+
+    const existing = freshPlayers.find(
+      p => p.name.toLowerCase() === cleanName.toLowerCase()
+    );
+    if (existing) return existing;
 
     const newPlayer: Player = {
       id: 'player_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
@@ -243,36 +245,52 @@ class QuizEngine {
       hasAnsweredCurrentQuestion: false
     };
 
-    const newState = {
-      ...this.state,
-      players: [...this.state.players, newPlayer]
+    const updatedState = {
+      ...freshData,
+      players: [...freshPlayers, newPlayer],
+      lastUpdate: Date.now()
     };
-    this.saveAndBroadcast(newState);
+
+    await set(ref(db, GAME_REF), updatedState);
     return newPlayer;
   }
 
-  public submitAnswer(playerId: string, optionIndex: number): { isCorrect: boolean; pointsEarned: number } {
-    if (this.state.status !== 'QUESTION') {
+  public async submitAnswer(
+    playerId: string,
+    optionIndex: number
+  ): Promise<{ isCorrect: boolean; pointsEarned: number }> {
+    // Leer estado fresco para evitar condiciones de carrera
+    const snapshot = await get(ref(db, GAME_REF));
+    const freshData = snapshot.val();
+    if (!freshData || freshData.status !== 'QUESTION') {
       return { isCorrect: false, pointsEarned: 0 };
     }
 
-    const currentQ: Question = QUIZ_QUESTIONS[this.state.currentQuestionIndex];
-    const isCorrect = optionIndex === currentQ.correctIndex;
-    const timeTakenMs = this.state.questionStartTime ? Date.now() - this.state.questionStartTime : 5000;
-    
-    // Scoring logic: Max 1000 points based on speed (within time limit) + streak bonus
-    let pointsEarned = 0;
-    let newStreak = 0;
+    const rawPlayers = freshData.players;
+    const freshPlayers: Player[] = rawPlayers
+      ? (Array.isArray(rawPlayers)
+          ? rawPlayers.filter(Boolean)
+          : Object.values(rawPlayers))
+      : [];
 
-    const targetPlayer = this.state.players.find(p => p.id === playerId);
+    const targetPlayer = freshPlayers.find(p => p.id === playerId);
     if (!targetPlayer || targetPlayer.hasAnsweredCurrentQuestion) {
       return { isCorrect: false, pointsEarned: 0 };
     }
 
+    const currentQ: Question = QUIZ_QUESTIONS[freshData.currentQuestionIndex];
+    const isCorrect = optionIndex === currentQ.correctIndex;
+    const timeTakenMs = freshData.questionStartTime
+      ? Date.now() - freshData.questionStartTime
+      : 5000;
+
+    let pointsEarned = 0;
+    let newStreak = 0;
+
     if (isCorrect) {
       const timeLimitMs = (currentQ.timeLimit || 20) * 1000;
-      const speedFactor = Math.max(0, 1 - (timeTakenMs / timeLimitMs));
-      const basePoints = Math.round(500 + (speedFactor * 500));
+      const speedFactor = Math.max(0, 1 - timeTakenMs / timeLimitMs);
+      const basePoints = Math.round(500 + speedFactor * 500);
       newStreak = (targetPlayer.streak || 0) + 1;
       const streakBonus = Math.min(newStreak * 100, 500);
       pointsEarned = basePoints + streakBonus;
@@ -280,7 +298,7 @@ class QuizEngine {
       newStreak = 0;
     }
 
-    const updatedPlayers = this.state.players.map(p => {
+    const updatedPlayers = freshPlayers.map(p => {
       if (p.id === playerId) {
         return {
           ...p,
@@ -288,19 +306,19 @@ class QuizEngine {
           streak: newStreak,
           lastAnswerIndex: optionIndex,
           lastAnswerTimeMs: timeTakenMs,
-          isCorrect: isCorrect,
+          isCorrect,
           hasAnsweredCurrentQuestion: true
         };
       }
       return p;
     });
 
-    const newState = {
-      ...this.state,
-      players: updatedPlayers
-    };
+    await set(ref(db, GAME_REF), {
+      ...freshData,
+      players: updatedPlayers,
+      lastUpdate: Date.now()
+    });
 
-    this.saveAndBroadcast(newState);
     return { isCorrect, pointsEarned };
   }
 
@@ -316,21 +334,22 @@ class QuizEngine {
     const currentQ = QUIZ_QUESTIONS[this.state.currentQuestionIndex];
     if (!currentQ) return;
 
-    const botPlayers = this.state.players.filter(p => p.isBot && !p.hasAnsweredCurrentQuestion);
+    const botPlayers = this.state.players.filter(
+      p => p.isBot && !p.hasAnsweredCurrentQuestion
+    );
     botPlayers.forEach(bot => {
-      // Delay response between 1.5s and 8.5s
       const delay = Math.floor(1500 + Math.random() * 7000);
       const timer = window.setTimeout(() => {
-        // 75% chance of picking correct answer for bots
         const isSmartChoice = Math.random() < 0.75;
         let choice = currentQ.correctIndex;
         if (!isSmartChoice) {
-          const wrongOptions = [0, 1, 2, 3].filter(idx => idx !== currentQ.correctIndex);
+          const wrongOptions = [0, 1, 2, 3].filter(
+            idx => idx !== currentQ.correctIndex
+          );
           choice = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
         }
         this.submitAnswer(bot.id, choice);
       }, delay);
-
       this.botTimers.push(timer);
     });
   }
